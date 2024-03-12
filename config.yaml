@@ -1,0 +1,8 @@
+waiting_time: 500
+redirect_time: 2000
+redirect_url: http://localhost:8080
+jwt:
+  enabled: false
+  publickey_url: https://jwks.example.com
+backend:
+  server_url: https://backend.example.com
