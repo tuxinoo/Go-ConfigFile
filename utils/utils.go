@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"crypto/md5"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -26,6 +29,30 @@ type Config struct {
 		URL   string `yaml:"server_url"`
 		Creds ClientCreds
 	} `yaml:"backend"`
+	Sign1 string
+	Sign2 string
+}
+
+func Sign(configfile string) string {
+	f, err := os.Open(configfile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	h := md5.New()
+	if _, err := io.Copy(h, f); err != nil {
+		log.Fatal(err)
+	}
+	return fmt.Sprintf("%x", (h.Sum(nil)))
+}
+
+func (c *Config) CheckCredsSignature(signature string) bool {
+	return (c.Sign2 == signature)
+}
+
+func (c *Config) CheckSignature(signature string) bool {
+	return (c.Sign1 == signature)
 }
 
 func (c *Config) AuthURL() string {
@@ -51,6 +78,7 @@ func LoadConfig(configfile string) Config {
 	if err != nil {
 		os.Exit(1)
 	}
+	conf.Sign1 = Sign(filename)
 	return conf
 }
 
@@ -70,4 +98,5 @@ func (c *Config) AppendCreds(credsfils string) {
 	// fmt.Println(creds)
 	c.Backend.Creds.ClientID = creds["client_id"].(string)
 	c.Backend.Creds.ClientSecret = creds["client_secret"].(string)
+	c.Sign2 = Sign(filename)
 }

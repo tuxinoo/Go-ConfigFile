@@ -30,7 +30,10 @@ func debug() {
 }
 
 func main() {
-	// debug()
+	debug()
 	fmt.Println(config.AuthURL())
 	fmt.Println(config.BackendURL())
+	fmt.Println("Signature Config OK:", config.CheckSignature(helper.Sign("config.yaml")))
+	fmt.Println("Signature Config KO:", config.CheckSignature(helper.Sign("config2.yaml")))
+	fmt.Println("Signature Creds OK:", config.CheckCredsSignature(helper.Sign("creds.yaml")))
 }
